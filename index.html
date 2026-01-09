@@ -58,32 +58,40 @@
     
     <script src="Build/BUBBLE609.loader.js"></script>
     <script>
-      // Game aspect ratio (9:16 portrait mobile style)
-      const GAME_ASPECT = 9 / 16;
+      // Detect mobile devices
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       
-      // Base resolution (internal render size)
-      const BASE_WIDTH = 1080;
-      const BASE_HEIGHT = 1920;
+      // Aspect ratios: 16:9 for desktop, 9:16 for mobile
+      const DESKTOP_ASPECT = 16 / 9;  // Landscape
+      const MOBILE_ASPECT = 9 / 16;   // Portrait
       
       const canvas = document.getElementById("unity-canvas");
       const container = document.getElementById("unity-container");
       const loading = document.getElementById("loading");
       
+      function getTargetAspect() {
+        if (isMobile) {
+          return MOBILE_ASPECT;
+        }
+        return DESKTOP_ASPECT;
+      }
+      
       function resizeCanvas() {
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
         const windowAspect = windowWidth / windowHeight;
+        const targetAspect = getTargetAspect();
         
         let canvasWidth, canvasHeight;
         
-        if (windowAspect > GAME_ASPECT) {
-          // Window is wider than game - fit to height
+        if (windowAspect > targetAspect) {
+          // Window is wider than target - fit to height
           canvasHeight = windowHeight;
-          canvasWidth = windowHeight * GAME_ASPECT;
+          canvasWidth = windowHeight * targetAspect;
         } else {
-          // Window is taller than game - fit to width
+          // Window is taller than target - fit to width
           canvasWidth = windowWidth;
-          canvasHeight = windowWidth / GAME_ASPECT;
+          canvasHeight = windowWidth / targetAspect;
         }
         
         // Apply CSS size (display size)
@@ -118,7 +126,7 @@
         devicePixelRatio: Math.min(window.devicePixelRatio, 2), // Cap at 2x for performance
       }).then((unityInstance) => {
         loading.classList.add("hidden");
-        console.log("Unity loaded successfully!");
+        console.log("Unity loaded successfully! Mode:", isMobile ? "Mobile (9:16)" : "Desktop (16:9)");
       }).catch((error) => {
         loading.textContent = "Error loading game";
         console.error("Unity load error:", error);
